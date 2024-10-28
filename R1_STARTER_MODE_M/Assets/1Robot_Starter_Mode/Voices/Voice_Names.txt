@@ -1,0 +1,33 @@
+Female Voice Names:
+
+    en-US-JennyNeural
+    en-US-AriaNeural
+    en-US-AmberNeural
+    en-US-AnaNeural
+    en-US-AshleyNeural
+    en-US-CoraNeural
+    en-US-ElizabethNeural
+    en-US-JaneNeural
+    en-US-MichelleNeural
+    en-US-MonicaNeural
+    en-US-NancyNeural
+    en-US-SaraNeural
+
+Male Voice Names:
+
+    en-US-GuyNeural
+    en-US-DavisNeural
+    en-US-BrandonNeural
+    en-US-ChristopherNeural
+    en-US-EricNeural
+    en-US-JacobNeural
+    en-US-JasonNeural
+    en-US-RogerNeural
+    en-US-SteffanNeural
+    en-US-TonyNeural
+
+
+
+
+
+
