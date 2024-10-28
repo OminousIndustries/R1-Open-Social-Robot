@@ -24,6 +24,7 @@ While most instructions are provided in video format, important details can also
    - [Arduino Setup](#arduino-setup)
    - [Advanced Mode](#advanced-mode)
 5. [Unity Project Files](#unity-project-files)
+6. [Connecting to a Local LLM](#connecting-to-a-local-llm)
 
 ---
 
@@ -153,4 +154,86 @@ The R1 robot has two versions of the Unity project, each with different mouth sp
 
 ---
 
-If you have any questions, feel free to reach out to us at [hello@stemlabkit.com](mailto:hello@stemlabkit.com). Enjoy building your R1 robot, and remember to follow all safety guidelines when working with tools and equipment!
+### Connecting to a Local LLM
+
+The R1 robot can be powered by a locally hosted language model, providing real-time conversational abilities. These instructions cover setting up the robot to work with [Oobabooga's text-gen-webui](https://github.com/oobabooga/text-generation-webui) as the backend for a Local LLM.
+
+This setup allows the robot to connect to and be powered by a locally hosted AI model of your choosing.
+
+#### Step-by-Step Instructions
+
+1. **Setting Up the Unity Project**:
+   - Navigate to the `LocalLLM` folder, which contains two scripts: `RoboLogic.cs` and `RoboListen.cs`.
+   - In your Unity project, open the existing `RoboLogic.cs` and `RoboListen.cs` scripts.
+   - Replace the contents of these scripts with the versions from the `LocalLLM` folder. This will configure the robot to communicate with the local LLM setup.
+
+2. **Starting the Web UI with the Correct Flags**:
+   - Launch the web UI with the `--listen` flag to allow external connections.
+   - In the web UI, go to the **Session** tab and select the **OpenAI** extension. Click **Apply** and restart the session.
+
+   ![Session Tab - OpenAI Extension](./images/Image1.png)
+
+3. **Load Your Chosen Model**:
+   - Load the AI model you wish to use as you normally would within the web UI.
+   - Ensure that the machine running the web UI is configured to allow communication on **port 5000**, which is required for the robot to connect.
+
+   For more detailed information on setting up the OpenAI API within the text-gen-webui, refer to [this guide](https://github.com/oobabooga/text-generation-webui/wiki/12-%E2%80%90-OpenAI-API).
+
+4. **Configuring Unity for Local LLM Connection**:
+   - In Unity’s **Inspector** pane, enter the name of the character you wish to communicate with in the web UI, as well as the endpoint URL for the web UI machine.
+
+   ![Local LLM Connection Settings in Unity Inspector](./images/Image3.png)
+
+   - To find the character name in the web UI, go to **Parameters > Chat > Character**.
+
+   ![Character Selection in Web UI](./images/Image4.png)
+
+5. **Testing the Connection**:
+   - If everything is configured correctly, you should see the LLM processing requests from the robot in the terminal where the web UI is running.
+
+   ![Terminal Output on LLM Machine](./images/Image5.png)
+
+---
+
+## 6. Connecting to a Local LLM
+
+The R1 robot can be powered by a locally hosted language model, providing real-time conversational abilities. These instructions cover setting up the robot to work with [Oobabooga's text-gen-webui](https://github.com/oobabooga/text-generation-webui) as the backend for a Local LLM.
+
+This setup allows the robot to connect to and be powered by a locally hosted AI model of your choosing.
+
+### Step-by-Step Instructions
+
+1. **Setting Up the Unity Project**:
+   - Navigate to the `LocalLLM` folder, which contains two scripts: `RoboLogic.cs` and `RoboListen.cs`.
+   - In your Unity project, open the existing `RoboLogic.cs` and `RoboListen.cs` scripts.
+   - Replace the contents of these scripts with the versions from the `LocalLLM` folder. This will configure the robot to communicate with the local LLM setup.
+
+2. **Starting the Web UI with the Correct Flags**:
+   - Launch the web UI with the `--listen` flag to allow external connections.
+   - In the web UI, go to the **Session** tab and select the **OpenAI** extension. Click **Apply** and restart the session.
+
+   ![Session Tab - OpenAI Extension](./images/Image1.png)
+
+3. **Load Your Chosen Model**:
+   - Load the AI model you wish to use as you normally would within the web UI.
+   - Ensure that the machine running the web UI is configured to allow communication on **port 5000**, which is required for the robot to connect.
+
+   For more detailed information on setting up the OpenAI API within the text-gen-webui, refer to [this guide](https://github.com/oobabooga/text-generation-webui/wiki/12-%E2%80%90-OpenAI-API).
+
+4. **Configuring Unity for Local LLM Connection**:
+   - In Unity’s **Inspector** pane, enter the name of the character you wish to communicate with in the web UI, as well as the endpoint URL for the web UI machine.
+
+   ![Local LLM Connection Settings in Unity Inspector](./images/Image3.png)
+
+   - To find the character name in the web UI, go to **Parameters > Chat > Character**.
+
+   ![Character Selection in Web UI](./images/Image4.png)
+
+5. **Testing the Connection**:
+   - If everything is configured correctly, you should see the LLM processing requests from the robot in the terminal where the web UI is running.
+
+   ![Terminal Output on LLM Machine](./images/Image5.png)
+
+---
+
+If you have any questions, feel free to reach out to me. Enjoy building your R1 robot, and remember to follow all safety guidelines when working with tools and equipment!
