@@ -41,7 +41,7 @@ Before you begin building, print the files and gather all the necessary parts. H
 The robot's frame is 3D printed. All the necessary STL files and instructions for printing are included in the following folder. Please refer to the "Printing Guide PDF" for important details about printing the pieces:
 
 - [STL Files for 3D Printing](./build-instructions/Printing_Files)
-- [Printing Guide (PDF)](./build-instructions/R1_Printing_README.pdf)
+- [Printing Guide (PDF)](./build-instructions/R1_Printing_Readme.pdf)
 
 ---
 
