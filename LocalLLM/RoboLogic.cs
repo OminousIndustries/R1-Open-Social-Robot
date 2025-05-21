@@ -6,33 +6,77 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System;
 
-public class GptResponse
-{
-    public string id { get; set; }
-    public string response_object { get; set; }
-    public string created { get; set; }
-    public string model { get; set; }
-    public List<Choice> choices { get; set; }
-}
+// Old OpenAI-compatible data structures - Commented out
+//public class GptResponse
+//{
+//    public string id { get; set; }
+//    public string response_object { get; set; }
+//    public string created { get; set; }
+//    public string model { get; set; }
+//    public List<Choice> choices { get; set; }
+//}
 
-public class Choice
-{
-    public Message message { get; set; }
-    public string finish_reason { get; set; }
-}
+//public class Choice
+//{
+//    public Message message { get; set; }
+//    public string finish_reason { get; set; }
+//}
 
-public class Message
+//public class Message
+//{
+//    public string role { get; set; }
+//    public string content { get; set; }
+//}
+
+// New Gemini API Data Structures
+[System.Serializable]
+public class GeminiRequest
 {
-    public string role { get; set; }
-    public string content { get; set; }
+    public Content[] contents;
+    // Optional: public GenerationConfig generationConfig;
+    // Optional: public SafetySetting[] safetySettings;
 }
 
 [System.Serializable]
-public class MessageRequestData
+public class Content
 {
-    public Message[] messages;
-    public string mode = "chat";
-    public string character;
+    public Part[] parts;
+    public string role; // "user" for requests, "model" for responses
+}
+
+[System.Serializable]
+public class Part
+{
+    public string text;
+}
+
+[System.Serializable]
+public class GeminiResponse
+{
+    public Candidate[] candidates;
+    public PromptFeedback promptFeedback;
+}
+
+[System.Serializable]
+public class Candidate
+{
+    public Content content; // Reuses the Content class defined above
+    public string finishReason;
+    public int index;
+    public SafetyRating[] safetyRatings;
+}
+
+[System.Serializable]
+public class SafetyRating
+{
+    public string category;
+    public string probability;
+}
+
+[System.Serializable]
+public class PromptFeedback
+{
+    public SafetyRating[] safetyRatings;
 }
 
 public class RoboLogic : MonoBehaviour
@@ -41,11 +85,17 @@ public class RoboLogic : MonoBehaviour
     private RoboSpeak tts;
     private RoboListen stt;
 
-    [SerializeField]
-    private string characterName = "Name"; // Change this to the character name you want to use. This is under Parameters -> Chat -> Character in the webui
+    // [SerializeField]
+    // private string characterName = "Name"; // Change this to the character name you want to use. This is under Parameters -> Chat -> Character in the webui
+
+    // [SerializeField]
+    // private string localEndpoint = "http://192.168.50.125:5000/v1/chat/completions"; // Change the ip to the address of the machine running your webui
 
     [SerializeField]
-    private string localEndpoint = "http://192.168.50.125:5000/v1/chat/completions"; // Change the ip to the address of the machine running your webui
+    private string geminiApiKey = ""; // TODO: Add your Gemini API Key here
+
+    [SerializeField]
+    private string geminiModelName = "gemini-1.5-flash-latest";
 
     private static string ResponseName;
     private bool myFunctionCalled;
@@ -93,69 +143,94 @@ public class RoboLogic : MonoBehaviour
 
     public IEnumerator CallLocalLLM(string message)
     {
-        // Create a temporary object to match the expected format
-        var tempMessages = new Message[]
+        string url = $"https://generativelanguage.googleapis.com/v1beta/models/{geminiModelName}:generateContent?key={geminiApiKey}";
+
+        // Create the request object using Gemini API structure
+        var requestObject = new GeminiRequest
         {
-            new Message { role = "user", content = message }
+            contents = new Content[]
+            {
+                new Content
+                {
+                    role = "user", // Gemini API uses "user" for messages from the user
+                    parts = new Part[] { new Part { text = message } }
+                }
+            }
         };
 
-        // Create the request object
-        var requestObject = new
-        {
-            messages = tempMessages,
-            mode = "chat",
-            character = characterName
-        };
-
-        // Serialize using Newtonsoft.Json instead of JsonUtility
         string jsonData = JsonConvert.SerializeObject(requestObject);
-        Debug.Log($"Sending request data: {jsonData}"); // Debug the request data
+        Debug.Log($"Sending Gemini request data: {jsonData}");
 
-        using (UnityWebRequest request = new UnityWebRequest(localEndpoint, "POST"))
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {
             byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
+            // The API key is part of the URL, so no "Authorization" header is typically needed for Gemini's generateContent endpoint.
 
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string responseBody = request.downloadHandler.text;
-                Debug.Log("Received response body: " + responseBody);
+                Debug.Log("Received Gemini response body: " + responseBody);
 
                 if (string.IsNullOrEmpty(responseBody))
                 {
-                    Debug.Log("Response body is null or empty.");
+                    Debug.LogError("Gemini API response body is null or empty.");
                     yield break;
                 }
 
-                GptResponse gptResponse;
+                GeminiResponse geminiResponse;
                 try
                 {
-                    gptResponse = JsonConvert.DeserializeObject<GptResponse>(responseBody);
+                    geminiResponse = JsonConvert.DeserializeObject<GeminiResponse>(responseBody);
                 }
                 catch (Exception e)
                 {
-                    Debug.Log("Failed to parse response body: " + e.Message);
+                    Debug.LogError("Failed to parse Gemini API response body: " + e.Message + "\nResponse Body: " + responseBody);
                     yield break;
                 }
 
-                if (gptResponse == null || gptResponse.choices == null || gptResponse.choices.Count == 0)
+                if (geminiResponse == null)
                 {
-                    Debug.Log("No choices in response.");
+                    Debug.LogError("Parsed GeminiResponse is null.");
+                    yield break;
+                }
+                
+                if (geminiResponse.candidates == null || geminiResponse.candidates.Length == 0)
+                {
+                    Debug.LogWarning("No candidates in Gemini response.");
+                    // Check for prompt feedback if candidates are missing, as it might contain blocking reasons
+                    if (geminiResponse.promptFeedback != null && geminiResponse.promptFeedback.safetyRatings != null && geminiResponse.promptFeedback.safetyRatings.Length > 0)
+                    {
+                        foreach (var feedbackRating in geminiResponse.promptFeedback.safetyRatings)
+                        {
+                            Debug.LogWarning($"Prompt Feedback Safety Rating: Category: {feedbackRating.category}, Probability: {feedbackRating.probability}");
+                        }
+                    }
                     yield break;
                 }
 
-                string responseText = gptResponse.choices[0].message.content;
-                responseText = responseText.Replace(",", "");
+                var firstCandidate = geminiResponse.candidates[0];
+                if (firstCandidate.content == null || firstCandidate.content.parts == null || firstCandidate.content.parts.Length == 0)
+                {
+                    Debug.LogWarning("No content or parts in the first candidate of Gemini response.");
+                     if (firstCandidate.finishReason != null) {
+                        Debug.LogWarning($"Candidate finishReason: {firstCandidate.finishReason}");
+                    }
+                    yield break;
+                }
+
+                string responseText = firstCandidate.content.parts[0].text;
+                // responseText = responseText.Replace(",", ""); // This line might be specific to old API's output, evaluate if needed for Gemini
                 Name = responseText;
                 receivedDataCount++;
             }
             else
             {
-                Debug.LogError($"Error Details:");
+                Debug.LogError($"Gemini API Error Details:");
                 Debug.LogError($"Error: {request.error}");
                 Debug.LogError($"Response Code: {request.responseCode}");
 
