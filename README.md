@@ -25,6 +25,7 @@ While most instructions are provided in video format, important details can also
    - [Advanced Mode](#advanced-mode)
 5. [Unity Project Files](#unity-project-files)
 6. [Connecting to a Local LLM](#connecting-to-a-local-llm)
+7. [Connecting to Google Gemini API](#connecting-to-google-gemini-api)
 
 ---
 
@@ -192,6 +193,51 @@ This setup allows the robot to connect to and be powered by a locally hosted AI 
    - If everything is configured correctly, you should see the LLM processing requests from the robot in the terminal where the web UI is running.
 
    ![Terminal Output on LLM Machine](./images/Image5.png)
+
+---
+
+## 7. Connecting to Google Gemini API
+
+The R1 robot can also be configured to use Google's Gemini API for its conversational abilities, as an alternative to a local LLM or other services. This setup uses the `RoboLogic.cs` script which has been adapted for the Gemini API.
+
+### Prerequisites:
+
+*   **Google Cloud Project:** You need a Google Cloud Project set up.
+*   **Gemini API Enabled:** Ensure the "Generative Language API" (or "Vertex AI API" if accessing Gemini through Vertex) is enabled for your project.
+*   **API Key:** You must have an API key associated with your project that is authorized to use the Gemini API.
+
+### Step-by-Step Instructions:
+
+1.  **Obtain your Google API Key:**
+    *   Go to the [Google Cloud Console](https://console.cloud.google.com/).
+    *   Navigate to your project.
+    *   Go to "APIs & Services" > "Credentials".
+    *   Create a new API key if you don't have one, or use an existing key. Ensure it's properly restricted for security, but allows access to the Generative Language API.
+    *   **Important:** Keep this API key secure. Do not share it publicly or commit it directly into version control if you are managing your project on a public repository.
+
+2.  **Configure Unity Project:**
+    *   Open your R1 Unity project (e.g., `r1-starter-mode-f` or `r1-starter-mode-m`).
+    *   Locate the GameObject that has the `RoboLogic.cs` script attached to it (this is typically the main robot controller object).
+    *   In the Unity Inspector window for this GameObject, you will find the following fields under the "Robo Logic" component:
+        *   **Gemini Api Key:** Paste your Google API Key here.
+        *   **Gemini Model Name:** Enter the specific Gemini model you wish to use (e.g., `gemini-1.5-flash-latest`, `gemini-pro`, `gemini-1.0-pro`). The default is often `gemini-1.5-flash-latest`. You can find available model names in the [Google AI documentation](https://ai.google.dev/models/gemini).
+
+    ![Gemini API Connection Settings in Unity Inspector](./images/Gemini_Inspector_Setup.png) 
+    *(Note: You will need to add an illustrative image named `Gemini_Inspector_Setup.png` to the `images/` directory later if you want this image to show. For now, the markdown link is a placeholder.)*
+
+3.  **Ensure Correct Scripts:**
+    *   Make sure the `LocalLLM/RoboLogic.cs` script in your Unity project is the version that has been modified for Gemini API access. If you downloaded the project after these changes, it should be correct. If you are modifying an older version, ensure you've updated the script.
+
+4.  **Testing the Connection:**
+    *   Run the Unity scene.
+    *   When the robot attempts to get a response (e.g., after speech-to-text processing via `RoboListen`), it will now call the Google Gemini API.
+    *   Check the Unity Console for any log messages from `RoboLogic.cs`. Successful calls will log the received response, while errors will detail issues with the API key, model name, endpoint, or network connectivity.
+
+### Important Considerations:
+
+*   **API Costs:** Using the Google Gemini API may incur costs based on your usage. Familiarize yourself with the [Gemini API pricing](https://ai.google.dev/pricing).
+*   **Rate Limits:** Be aware of any rate limits imposed by the API to avoid service interruptions.
+*   **Security:** Handle your API key with care. For more advanced or production scenarios, consider more secure ways to manage API keys rather than pasting them directly into the Inspector, such as using environment variables or a secure configuration service (though this is beyond the scope of the current basic setup).
 
 ---
 
